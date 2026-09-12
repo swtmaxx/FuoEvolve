@@ -551,7 +551,6 @@ private fun KaraokeLyricText(
             ).size.width.toFloat()
         }
     }
-    val progress = karaokeFillProgress(words, positionMs.value, wordWidths)
     val textStyle = style.copy(fontWeight = fontWeight)
 
     BoxWithConstraints(modifier = modifier) {
@@ -576,12 +575,19 @@ private fun KaraokeLyricText(
             color = inactiveColor,
             softWrap = true,
         )
+        // Performance: read positionMs inside the draw phase so per-frame karaoke
+        // updates invalidate only drawing, not the whole composable.
         Text(
             text = text,
             style = textStyle,
             color = activeColor,
             softWrap = true,
             modifier = Modifier.drawWithContent {
+                val progress = karaokeFillProgress(
+                    words = words,
+                    positionMs = positionMs.value,
+                    wordWidths = wordWidths,
+                )
                 var remainingWidth = totalVisualWidth * progress.coerceIn(0f, 1f)
                 if (remainingWidth <= 0f || !remainingWidth.isFinite()) return@drawWithContent
 
