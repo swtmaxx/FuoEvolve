@@ -56,7 +56,14 @@ android {
         versionCode = gitVersionCode
         versionName = gitVersionName
 
-        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+            // Optional extra ABIs (e.g. watch/SC9820E which is armeabi-v7a):
+            //   ./gradlew -PfuoExtraAbis=armeabi-v7a ...
+            val extraAbis = providers.gradleProperty("fuoExtraAbis").orNull
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }.orEmpty()
+            abiFilters += extraAbis
+        }
     }
 
     sourceSets {
