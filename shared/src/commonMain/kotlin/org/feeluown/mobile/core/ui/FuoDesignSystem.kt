@@ -70,7 +70,9 @@ internal object FuoMotion {
     const val pageFadeMillis = 180
     const val coverTransitionMillis = 360
     const val coverFadeMillis = 220
-    const val themeColorTransitionMillis = 420
+    // Performance: shorter theme-color transition reduces the recomposition
+    // window after cover/theme changes while keeping the fade perceptible.
+    const val themeColorTransitionMillis = 240
     const val progressAnimationMillis = 180
     const val overlayEnterMillis = 240
     const val overlayExitMillis = 200

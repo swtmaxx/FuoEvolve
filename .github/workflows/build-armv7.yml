@@ -1,0 +1,55 @@
+name: Build ARMv7 Debug APK
+
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - perf/ui-optimizations
+    paths:
+      - 'androidApp/build.gradle.kts'
+      - 'shared/src/commonMain/**'
+      - '.github/workflows/build-armv7.yml'
+
+concurrency:
+  group: build-armv7-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-armv7:
+    name: Build debug APK (including armeabi-v7a)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Prepare Git refs for Gradle versioning
+        run: |
+          if ! git show-ref --verify --quiet refs/heads/master; then
+            git branch master origin/master
+          fi
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build ARMv7 debug APK
+        run: ./gradlew --configuration-cache -PfuoExtraAbis=armeabi-v7a :androidApp:assembleDebug
+
+      - name: Upload ARMv7 debug APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: fuo-evolve-armeabi-v7a-debug
+          path: androidApp/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30

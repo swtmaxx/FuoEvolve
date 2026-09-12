@@ -12,5 +12,6 @@ val LocalAppLayoutInfo = staticCompositionLocalOf { AppLayoutInfo() }
 data class AppLayoutInfo(
     val isLandscape: Boolean = false,
     val useWideLayout: Boolean = false,
+    val isCompactWatch: Boolean = false,
     val gridColumns: Int = 3,
 )

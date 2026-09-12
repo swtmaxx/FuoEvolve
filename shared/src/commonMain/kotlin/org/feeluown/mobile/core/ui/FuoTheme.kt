@@ -537,7 +537,9 @@ private fun relativeLuminance(color: Color): Double {
 }
 
 private object CoverThemeSeedCache {
-    private const val MAX_ENTRIES = 8
+    // Performance: larger seed cache avoids re-running palette extraction
+    // (decode + 128-color quantize + contrast search) for recently played covers.
+    private const val MAX_ENTRIES = 64
     private val mutex = Mutex()
     private val values = mutableMapOf<String, Color>()
     private val order = mutableListOf<String>()
