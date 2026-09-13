@@ -63,9 +63,7 @@ jobs:
           fi
 
       - name: Build ARMv7 debug APK
-        run: ./gradlew --configuration-cache -PfuoExtraAbis=armeabi-v7a :androidApp:assembleDebug
-        env:
-          FUO_WATCH_DEBUG_STORE_FILE: /tmp/fuo-watch-debug.jks
+        run: ./gradlew --configuration-cache -PfuoExtraAbis=armeabi-v7a -PfuoWatchDebugStoreFile=/tmp/fuo-watch-debug.jks :androidApp:assembleDebug
 
       - name: Upload ARMv7 debug APK
         uses: actions/upload-artifact@v7
