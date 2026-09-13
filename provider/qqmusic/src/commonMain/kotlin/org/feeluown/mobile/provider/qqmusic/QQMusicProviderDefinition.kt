@@ -25,7 +25,10 @@ internal object QQMusicProviderDefinition {
             "https://y.qq.com",
             listOf(listOf("qqmusic_key", "wxuin", "qm_keyst"), listOf("qqmusic_key", "uin", "qm_keyst")),
         ),
-        supportedLoginModes = setOf(org.feeluown.mobile.ProviderLoginMode.WebView),
+        supportedLoginModes = setOf(
+                org.feeluown.mobile.ProviderLoginMode.WebView,
+                org.feeluown.mobile.ProviderLoginMode.Cookie,
+            ),
     )
 
     val capabilities = ProviderCapabilities(

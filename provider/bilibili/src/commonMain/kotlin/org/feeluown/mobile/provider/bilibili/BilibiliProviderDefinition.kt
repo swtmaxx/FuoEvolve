@@ -31,7 +31,10 @@ internal object BilibiliProviderDefinition {
             "https://passport.bilibili.com/h5-app/passport/login?gourl=https%3A%2F%2Fm.bilibili.com%2F",
             listOf(listOf("SESSDATA", "bili_jct")),
         ),
-        supportedLoginModes = setOf(org.feeluown.mobile.ProviderLoginMode.WebView),
+        supportedLoginModes = setOf(
+                org.feeluown.mobile.ProviderLoginMode.WebView,
+                org.feeluown.mobile.ProviderLoginMode.Cookie,
+            ),
     )
 
     val capabilities = ProviderCapabilities(
