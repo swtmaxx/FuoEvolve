@@ -93,14 +93,26 @@ android {
                 keyPassword = fuoSigningKeyPassword
             }
         }
+        // Stable watch-debug keystore so successive armv7 builds can install over each other.
+        val watchStoreFile = providers.environmentVariable("FUO_WATCH_DEBUG_STORE_FILE").orNull
+        val watchKeystoreConfigured = watchStoreFile != null && java.io.File(watchStoreFile).isFile
+        create("fuoWatchDebug") {
+            if (watchKeystoreConfigured) {
+                storeFile = rootProject.file(watchStoreFile!!)
+                storePassword = "fuowatch123"
+                keyAlias = "fuo-watch-debug"
+                keyPassword = "fuowatch123"
+            }
+        }
     }
 
     buildTypes {
         debug {
-            signingConfig = if (hasFuoSigningConfig) {
-                signingConfigs.getByName("fuo")
-            } else {
-                signingConfigs.getByName("debug")
+            val watchStore = providers.environmentVariable("FUO_WATCH_DEBUG_STORE_FILE").orNull
+            signingConfig = when {
+                watchStore != null && java.io.File(watchStore).isFile -> signingConfigs.getByName("fuoWatchDebug")
+                hasFuoSigningConfig -> signingConfigs.getByName("fuo")
+                else -> signingConfigs.getByName("debug")
             }
         }
         release {

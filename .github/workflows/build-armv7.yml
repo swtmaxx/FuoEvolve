@@ -43,8 +43,29 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Restore stable debug keystore
+        id: keystore
+        uses: actions/cache@v4
+        with:
+          path: /tmp/fuo-watch-debug.jks
+          key: fuo-watch-debug-keystore-v1
+
+      - name: Generate debug keystore if missing
+        run: |
+          if [ ! -f /tmp/fuo-watch-debug.jks ]; then
+            keytool -genkeypair -v \
+              -keystore /tmp/fuo-watch-debug.jks \
+              -alias fuo-watch-debug \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass fuowatch123 \
+              -keypass fuowatch123 \
+              -dname "CN=FuoEvolve Watch Debug, OU=FuoEvolve, O=FuoEvolve, L=Shanghai, ST=Shanghai, C=CN"
+          fi
+
       - name: Build ARMv7 debug APK
         run: ./gradlew --configuration-cache -PfuoExtraAbis=armeabi-v7a :androidApp:assembleDebug
+        env:
+          FUO_WATCH_DEBUG_STORE_FILE: /tmp/fuo-watch-debug.jks
 
       - name: Upload ARMv7 debug APK
         uses: actions/upload-artifact@v7
