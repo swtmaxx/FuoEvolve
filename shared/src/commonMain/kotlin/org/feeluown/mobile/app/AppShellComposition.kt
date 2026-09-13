@@ -3,12 +3,21 @@ package org.feeluown.mobile
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
+private val CompactWatchMaxWidth = 360.dp
+private val CompactWatchMinHeight = 300.dp
+
 internal fun appLayoutInfoFor(maxWidth: Dp, maxHeight: Dp): AppLayoutInfo {
     val isLandscape = maxWidth > maxHeight
+    // S100-style square watch screen: narrow AND roughly square (not a tall phone).
+    // Phones are >=360dp wide with a tall aspect; a sub-360dp near-square display is a watch.
+    val isCompactWatch = maxWidth < CompactWatchMaxWidth && maxHeight >= CompactWatchMinHeight
     return AppLayoutInfo(
         isLandscape = isLandscape,
         useWideLayout = isLandscape && maxWidth >= 640.dp,
+        isCompactWatch = isCompactWatch,
         gridColumns = when {
+            // Square watch screens fit 2 columns best.
+            isCompactWatch -> 2
             maxWidth >= 980.dp -> 6
             maxWidth >= 760.dp -> 5
             maxWidth >= 640.dp -> 4

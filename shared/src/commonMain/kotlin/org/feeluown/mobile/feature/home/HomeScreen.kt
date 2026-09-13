@@ -144,6 +144,7 @@ fun HomeScreen(
                     sections = HomePrimarySections,
                     pagerState = pagerState,
                     compact = isNavigationCompact,
+                    isCompactWatch = layoutInfo.isCompactWatch,
                     onSettings = home::openSettings,
                     onRecognition = onOpenRecognition,
                     onSearch = home::openSearch,
@@ -193,6 +194,7 @@ private fun ExpressiveHomeTopBar(
     sections: List<Pair<HomeSection, String>>,
     pagerState: PagerState,
     compact: Boolean,
+    isCompactWatch: Boolean = false,
     onSettings: () -> Unit,
     onRecognition: () -> Unit,
     onSearch: () -> Unit,
@@ -204,7 +206,11 @@ private fun ExpressiveHomeTopBar(
         label = "home navigation vertical padding",
     )
     val itemHeight by animateDpAsState(
-        targetValue = if (compact) 40.dp else 52.dp,
+        targetValue = when {
+            isCompactWatch -> 40.dp
+            compact -> 40.dp
+            else -> 52.dp
+        },
         animationSpec = tween(FuoMotion.overlayEnterMillis),
         label = "home navigation item height",
     )
@@ -251,18 +257,20 @@ private fun ExpressiveHomeTopBar(
                 height = itemHeight,
                 onSectionClick = onSectionClick,
             )
-            HomeNavigationAction(
-                compact = compact,
-                onClick = onRecognition,
-                contentDescription = "听歌识曲",
-                icon = Icons.Filled.Mic,
-            )
-            HomeNavigationAction(
-                compact = compact,
-                onClick = onSearch,
-                contentDescription = "搜索",
-                icon = Icons.Filled.Search,
-            )
+            if (!isCompactWatch) {
+                HomeNavigationAction(
+                    compact = compact,
+                    onClick = onRecognition,
+                    contentDescription = "听歌识曲",
+                    icon = Icons.Filled.Mic,
+                )
+                HomeNavigationAction(
+                    compact = compact,
+                    onClick = onSearch,
+                    contentDescription = "搜索",
+                    icon = Icons.Filled.Search,
+                )
+            }
         }
     }
 }

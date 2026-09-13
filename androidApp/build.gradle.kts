@@ -1,3 +1,4 @@
+import java.io.File
 import java.util.Properties
 
 plugins {
@@ -56,7 +57,14 @@ android {
         versionCode = gitVersionCode
         versionName = gitVersionName
 
-        ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+            // Optional extra ABIs (e.g. watch/SC9820E which is armeabi-v7a):
+            //   ./gradlew -PfuoExtraAbis=armeabi-v7a ...
+            val extraAbis = providers.gradleProperty("fuoExtraAbis").orNull
+                ?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }.orEmpty()
+            abiFilters += extraAbis
+        }
     }
 
     sourceSets {
@@ -86,14 +94,27 @@ android {
                 keyPassword = fuoSigningKeyPassword
             }
         }
+        // Stable watch-debug keystore so successive armv7 builds can install over each other.
+        // Activated with: -PfuoWatchDebugStoreFile=/path/to/keystore.jks
+        val watchStoreFile = providers.gradleProperty("fuoWatchDebugStoreFile").orNull
+        val watchKeystoreConfigured = watchStoreFile != null && file(watchStoreFile).exists()
+        create("fuoWatchDebug") {
+            if (watchKeystoreConfigured) {
+                storeFile = file(watchStoreFile!!)
+                storePassword = "fuowatch123"
+                keyAlias = "fuo-watch-debug"
+                keyPassword = "fuowatch123"
+            }
+        }
     }
 
     buildTypes {
         debug {
-            signingConfig = if (hasFuoSigningConfig) {
-                signingConfigs.getByName("fuo")
-            } else {
-                signingConfigs.getByName("debug")
+            val watchStore = providers.gradleProperty("fuoWatchDebugStoreFile").orNull
+            signingConfig = when {
+                watchStore != null && file(watchStore).exists() -> signingConfigs.getByName("fuoWatchDebug")
+                hasFuoSigningConfig -> signingConfigs.getByName("fuo")
+                else -> signingConfigs.getByName("debug")
             }
         }
         release {

@@ -33,6 +33,7 @@ internal object YtMusicProviderDefinition {
         providerName = NAME,
         supportedLoginModes = setOf(
             org.feeluown.mobile.ProviderLoginMode.Headers,
+            org.feeluown.mobile.ProviderLoginMode.Cookie,
             org.feeluown.mobile.ProviderLoginMode.OAuth,
         ),
     )

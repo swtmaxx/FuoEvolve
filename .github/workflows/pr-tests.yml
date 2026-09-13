@@ -17,10 +17,35 @@ jobs:
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
+  signing-secrets-check:
+    name: Check signing secrets availability
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      available: ${{ steps.check.outputs.available }}
+    steps:
+      - name: Check signing secrets
+        id: check
+        env:
+          FUO_SIGNING_STORE_PASSWORD: ${{ secrets.FUO_SIGNING_STORE_PASSWORD }}
+          FUO_SIGNING_KEY_ALIAS: ${{ secrets.FUO_SIGNING_KEY_ALIAS }}
+          FUO_SIGNING_KEY_PASSWORD: ${{ secrets.FUO_SIGNING_KEY_PASSWORD }}
+          FUO_SIGNING_KEYSTORE_BASE64: ${{ secrets.FUO_SIGNING_KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$FUO_SIGNING_STORE_PASSWORD" ] && [ -n "$FUO_SIGNING_KEY_ALIAS" ] && [ -n "$FUO_SIGNING_KEY_PASSWORD" ] && [ -n "$FUO_SIGNING_KEYSTORE_BASE64" ]; then
+            echo "available=true"
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Signing secrets not configured; skipping signed release APK."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
   android-package:
     name: Android signed release APK
-    needs: android
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    needs:
+      - android
+      - signing-secrets-check
+    if: github.event.pull_request.head.repo.full_name == github.repository && needs.signing-secrets-check.outputs.available == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
